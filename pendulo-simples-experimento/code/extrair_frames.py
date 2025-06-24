@@ -8,7 +8,7 @@ os.makedirs('data', exist_ok=True)
 
 
 # Caminho do vídeo (ajuste se necessário)
-video = 'C:/Users/Vinicius Antunes/Documents/pendulo-simples-experimento/video/WhatsApp Video 2025-06-23 at 16.32.36.mp4'
+video = 'C:/Users/Vinicius Antunes/Documents/pendulo-simples-experimento/video/WhatsApp Video 2025-06-24 at 15.52.15.mp4'
 
 # Abre o vídeo
 video_cv = cv2.VideoCapture(video)
