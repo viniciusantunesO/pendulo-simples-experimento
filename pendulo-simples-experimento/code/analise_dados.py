@@ -1,13 +1,18 @@
 import csv
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-tempo=[]
-x=[]
-y=[]
+# Parâmetros que você deve ajustar conforme seu vídeo
+L = 300  # comprimento do fio em pixels (meça no vídeo)
 
-with open('posicoes.csv', 'r') as csvfile:
+# Listas para armazenar dados
+tempo = []
+x = []
+y = []
+
+# Leitura do CSV
+with open('data/posicoes.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         tempo.append(float(row['tempo']))
@@ -20,56 +25,47 @@ with open('posicoes.csv', 'r') as csvfile:
         except:
             y.append(np.nan)
 
-plt.figure(figsize=(10, 4))
+# Calcular ponto de equilíbrio x (posição média)
+x_eq = np.nanmean(x)
 
-plt.subplot(1, 2, 1)
-plt.plot(tempo, x, 'b-', label='x (horizontal)')
-plt.xlabel('Tempo (s)')
-plt.ylabel('Posição x (unidade de pixel)')
-plt.legend()
-plt.grid()
+# Calcular deslocamento horizontal e ângulo em radianos
+dx = np.array(x) - x_eq
+ratio = dx / L
+ratio = np.clip(ratio, -1, 1)  # Evitar valores inválidos
+theta = np.arcsin(ratio)
 
-plt.subplot(1, 2, 2)
-plt.plot(tempo, y, 'r-', label='y (vertical)')
-plt.xlabel('Tempo (s)')
-plt.ylabel('Posição y (unidade de pixel)')
-plt.legend()
-plt.grid()
-
-plt.tight_layout()
-plt.show()
-
+# Função do modelo movimento harmônico amortecido
 def modelo_oha(t, A, b, w, phi):
     return A * np.exp(-b * t) * np.cos(w * t + phi)
 
+# Remover nan para ajuste
+mask = ~np.isnan(theta)
+tempo_fit = np.array(tempo)[mask]
+theta_fit = theta[mask]
 
-# remover nan dos dados para ajuste
-tempo_fit = np.array(tempo)
-x_fit = np.array(x)
-mask = ~np.isnan(x_fit)
-tempo_fit = tempo_fit[mask]
-x_fit = x_fit[mask]
+# Chute inicial dos parâmetros: amplitude, amortecimento, frequência angular, fase
+param_inicial = [max(abs(theta_fit)), 0.1, 2*np.pi, 0]
 
-# chute inicial
-param_inicial = [max(x_fit), 0.1, 2*np.pi, 0]
-
-param_ajustado, cov = curve_fit(modelo_oha, tempo_fit, x_fit, p0=param_inicial)
+# Ajuste dos parâmetros
+param_ajustado, cov = curve_fit(modelo_oha, tempo_fit, theta_fit, p0=param_inicial)
 
 A, b, w, phi = param_ajustado
 
 print(f"Ajuste concluído:")
-print(f"A = {A:.3f}")
-print(f"b = {b:.3f}")
-print(f"ω = {w:.3f}")
-print(f"φ = {phi:.3f}")
+print(f"Amplitude (rad): {A:.3f}")
+print(f"Amortecimento (b): {b:.3f}")
+print(f"Frequência angular (ω): {w:.3f} rad/s")
+print(f"Frequência (f): {w/(2*np.pi):.3f} Hz")
+print(f"Fase (φ): {phi:.3f} rad")
 
-
-plt.plot(tempo_fit, x_fit, 'b.', label='Dados')
+# Plotar dados e ajuste
+plt.figure(figsize=(10,6))
+plt.plot(tempo_fit, theta_fit, 'b.', label='Dados (ângulo)')
 plt.plot(tempo_fit, modelo_oha(tempo_fit, *param_ajustado), 'r-', label='Ajuste')
 plt.xlabel('Tempo (s)')
-plt.ylabel('Posição x (pixel)')
+plt.ylabel('Ângulo (rad)')
+plt.title('Movimento Harmônico Amortecido do Pêndulo')
 plt.legend()
 plt.grid()
 plt.show()
-
     
