@@ -8,7 +8,7 @@ os.makedirs('data', exist_ok=True)
 
 
 # Caminho do vídeo (ajuste se necessário)
-video = 'C:/Users/Vinicius Antunes/Documents/pendulo-simples-experimento/video/WhatsApp Video 2025-06-24 at 15.52.15.mp4'
+video = 'C:/Users/Vinicius Antunes/Documents/pendulo-simples-experimento/video/WhatsApp Video 2025-06-25 at 16.00.48.mp4'
 
 # Abre o vídeo
 video_cv = cv2.VideoCapture(video)
@@ -32,6 +32,8 @@ while True:
     ret, frame = video_cv.read()
     if not ret:
         break
+
+    frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
     frame_number += 1
     time = frame_number / fps
