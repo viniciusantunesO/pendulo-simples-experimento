@@ -5,7 +5,7 @@ from scipy.optimize import curve_fit
 
 # Constantes do experimento
 g = 9.8            # aceleração da gravidade (m/s^2)
-L_cm = 51.1          # comprimento do fio em cm (medido)
+L_cm = 61          # comprimento do fio em cm (medido)
 L = L_cm / 100     # converter para metros
 
 # Listas para armazenar dados
